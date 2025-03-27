@@ -5,6 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   BeforeInsert,
+  JoinColumn,
 } from 'typeorm';
 import { Company } from 'src/companies/entities/company.entity';
 
@@ -34,6 +35,7 @@ export class User {
     nullable: true,
     onDelete: 'SET NULL',
   })
+  @JoinColumn({ name: 'company_id' })
   company: Company;
 
   @BeforeInsert()

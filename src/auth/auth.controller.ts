@@ -1,6 +1,14 @@
-import { Controller, Post, Body, ConflictException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from 'src/users/users.service';
+import { UserLoginDto } from './user-login.dto';
+import { UserRegisterDto } from './user-register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -10,26 +18,23 @@ export class AuthController {
   ) {}
 
   @Post('login')
-  async login(@Body() body: { email: string; password: string }) {
-    const user = await this.authService.validateUser(body.email, body.password);
+  async login(@Body() userLoginDto: UserLoginDto) {
+    const user = await this.authService.validateUser(
+      userLoginDto.email,
+      userLoginDto.password,
+    );
     if (!user) {
-      throw new ConflictException('Napačen email ali geslo!');
+      throw new UnauthorizedException('Wrong email or password');
     }
     return this.authService.login(user);
   }
 
   @Post('register')
-  async register(
-    @Body() body: { email: string; password: string; fullName: string },
-  ) {
-    const existing = await this.usersService.findByEmail(body.email);
-    if (existing) throw new ConflictException('Email je že v uporabi!');
+  async register(@Body() userRegisterDto: UserRegisterDto) {
+    const existing = await this.usersService.findByEmail(userRegisterDto.email);
+    if (existing) throw new ConflictException('Email is already in use!');
 
-    const newUser = await this.usersService.create({
-      email: body.email,
-      passwordHash: body.password,
-      fullName: body.fullName,
-    });
+    const newUser = await this.usersService.create(userRegisterDto);
 
     const { passwordHash, ...userWithoutPassword } = newUser;
     return this.authService.login(userWithoutPassword);

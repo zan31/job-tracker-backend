@@ -15,12 +15,13 @@ export class UsersService {
   ) {}
 
   async findAll(): Promise<User[]> {
-    return this.usersRepo.find();
+    return this.usersRepo.find({ relations: ['company'] });
   }
 
   async findOne(id: number): Promise<User> {
     return await this.usersRepo.findOne({
       where: { id },
+      relations: ['company'],
     });
   }
 
