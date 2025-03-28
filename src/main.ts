@@ -5,7 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: 'http://localhost:4200',
+    origin: 'https://job-tracker-frontend-nu.vercel.app',
     credentials: true,
   });
   app.useGlobalPipes(new ValidationPipe());
