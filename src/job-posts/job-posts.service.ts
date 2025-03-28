@@ -35,8 +35,20 @@ export class JobPostsService {
 
   async update(id: number, dto: UpdateJobPostDto): Promise<JobPost> {
     const job = await this.jobsRepo.findOneByOrFail({ id });
-    await this.jobsRepo.update(id, dto);
-    return this.jobsRepo.findOne({ where: { id: id } });
+
+    const safeFields = {
+      title: dto.title,
+      description: dto.description,
+      location: dto.location,
+      salaryRange: dto.salaryRange,
+    };
+
+    await this.jobsRepo.update(id, safeFields);
+
+    return this.jobsRepo.findOne({
+      where: { id },
+      relations: ['applications', 'company'],
+    });
   }
 
   findByUser(userId: number) {
@@ -47,5 +59,8 @@ export class JobPostsService {
       where: { company: { id: companyId } },
       relations: ['applications', 'applications.user'],
     });
+  }
+  async delete(id: number): Promise<void> {
+    await this.jobsRepo.delete(id);
   }
 }

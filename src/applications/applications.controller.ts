@@ -10,6 +10,7 @@ import {
   Req,
   ForbiddenException,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
@@ -57,5 +58,14 @@ export class ApplicationsController {
     @Body() dto: { status: string },
   ) {
     return this.applicationsService.updateStatus(id, dto.status);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async withdraw(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.applicationsService.withdraw(id, req.user.userId);
   }
 }

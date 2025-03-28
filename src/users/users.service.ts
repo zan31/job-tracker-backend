@@ -7,6 +7,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CompaniesService } from 'src/companies/companies.service';
 import { S3 } from 'aws-sdk';
 
+import * as bcrypt from 'bcrypt';
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -49,7 +51,7 @@ export class UsersService {
     if (dto.fullName) user.fullName = dto.fullName;
 
     if (dto.passwordHash) {
-      user.passwordHash = dto.passwordHash;
+      user.passwordHash = await bcrypt.hash(dto.passwordHash, 10);
     }
 
     if (dto.cvUrl && user.cvUrl && user.cvUrl !== dto.cvUrl) {
@@ -68,5 +70,8 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User | undefined> {
     return this.usersRepo.findOne({ where: { email }, relations: ['company'] });
+  }
+  async delete(id: number): Promise<void> {
+    await this.usersRepo.delete(id);
   }
 }

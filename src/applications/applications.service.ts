@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Application } from './entities/application.entity';
@@ -69,5 +73,16 @@ export class ApplicationsService {
     if (!app) throw new NotFoundException();
     app.status = status;
     return this.appsRepo.save(app);
+  }
+
+  async withdraw(id: number, userId: number): Promise<void> {
+    const app = await this.appsRepo.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+    if (!app || app.user.id !== userId) {
+      throw new ForbiddenException('Not your application');
+    }
+    await this.appsRepo.delete(id);
   }
 }

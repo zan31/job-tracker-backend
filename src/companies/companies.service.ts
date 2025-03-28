@@ -32,4 +32,7 @@ export class CompaniesService {
     Object.assign(company, dto);
     return this.companiesRepo.save(company);
   }
+  async delete(id: number): Promise<void> {
+    await this.companiesRepo.delete(id);
+  }
 }

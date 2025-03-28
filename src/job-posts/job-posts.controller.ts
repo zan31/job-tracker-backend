@@ -1,7 +1,6 @@
 import {
   Controller,
   Post,
-  Put,
   Body,
   Param,
   ParseIntPipe,
@@ -9,6 +8,8 @@ import {
   Get,
   Req,
   ForbiddenException,
+  Delete,
+  Patch,
 } from '@nestjs/common';
 import { JobPostsService } from './job-posts.service';
 import { CreateJobPostDto } from './dto/create-job-post.dto';
@@ -46,8 +47,13 @@ export class JobPostsController {
     }
   }
 
-  @Put(':id')
+  @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateJobPostDto) {
     return this.jobPostsService.update(id, dto);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id', ParseIntPipe) id: number) {
+    return this.jobPostsService.delete(id);
   }
 }

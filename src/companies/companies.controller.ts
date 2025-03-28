@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Get,
   UseGuards,
+  Delete,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
@@ -32,5 +33,11 @@ export class CompaniesController {
   @Put(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCompanyDto) {
     return this.companiesService.update(id, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async delete(@Param('id', ParseIntPipe) id: number) {
+    return this.companiesService.delete(id);
   }
 }

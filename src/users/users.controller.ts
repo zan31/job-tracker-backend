@@ -7,6 +7,9 @@ import {
   Req,
   UseGuards,
   Inject,
+  Delete,
+  ParseIntPipe,
+  Param,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -61,5 +64,15 @@ export class UsersController {
     const fileUrl = `https://${process.env['AWS_BUCKET_NAME']}.s3.${process.env['AWS_REGION']}.amazonaws.com/${key}`;
 
     return { uploadUrl, fileUrl };
+  }
+  @UseGuards(JwtAuthGuard)
+  @Delete('me')
+  async deleteMe(@Req() req: RequestWithUser) {
+    return this.usersService.delete(req.user.userId);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async delete(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.delete(id);
   }
 }
