@@ -5,6 +5,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CompaniesService } from 'src/companies/companies.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -16,6 +17,13 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return this.usersRepo.find({ relations: ['company'] });
+  }
+
+  async findMe(userId: number): Promise<User> {
+    return await this.usersRepo.findOne({
+      where: { id: userId },
+      relations: ['company'],
+    });
   }
 
   async findOne(id: number): Promise<User> {
@@ -33,16 +41,20 @@ export class UsersService {
     return this.usersRepo.save(user);
   }
 
-  async update(id: number, dto: UpdateUserDto): Promise<User> {
-    const user = this.usersRepo.findOne({ where: { id: id } });
-    if (!user) {
-      throw new NotFoundException('Uporabnik ne obstaja');
+  async update(id: number, dto: UpdateUserDto) {
+    const user = await this.usersRepo.findOneBy({ id });
+    if (!user) throw new NotFoundException();
+
+    if (dto.fullName) user.fullName = dto.fullName;
+
+    if (dto.passwordHash) {
+      user.passwordHash = await bcrypt.hash(dto.passwordHash, 10);
     }
-    await this.usersRepo.update(id, dto);
-    return this.usersRepo.findOne({ where: { id: id } });
+
+    return this.usersRepo.save(user);
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    return this.usersRepo.findOne({ where: { email } });
+    return this.usersRepo.findOne({ where: { email }, relations: ['company'] });
   }
 }

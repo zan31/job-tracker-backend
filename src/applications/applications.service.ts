@@ -15,13 +15,18 @@ export class ApplicationsService {
     private readonly jobPostsService: JobPostsService,
   ) {}
 
-  async create(dto: CreateApplicationDto): Promise<Application> {
+  async create(
+    dto: CreateApplicationDto,
+    userId: number,
+  ): Promise<Application> {
     const app = this.appsRepo.create({ status: dto.status ?? 'applied' });
-    const user = this.usersService.findOne(dto.userId);
-    const jobPost = this.jobPostsService.findOne(dto.jobPostId);
+    const user = await this.usersService.findOne(userId);
+    const jobPost = await this.jobPostsService.findOne(dto.jobPostId);
     if (!user || !jobPost) {
       throw new NotFoundException('Uporabnik ali razpis ne obstaja');
     }
+    app.user = user;
+    app.jobPost = jobPost;
     return this.appsRepo.save(app);
   }
 
@@ -42,6 +47,27 @@ export class ApplicationsService {
       app.jobPost = jobPost;
     }
     Object.assign(app, dto);
+    return this.appsRepo.save(app);
+  }
+
+  async findByUser(userId: number) {
+    return this.appsRepo.find({
+      where: { user: { id: userId } },
+      relations: ['jobPost'],
+    });
+  }
+
+  async findByJob(jobId: number): Promise<Application[]> {
+    return this.appsRepo.find({
+      where: { jobPost: { id: jobId } },
+      relations: ['user', 'jobPost'],
+    });
+  }
+
+  async updateStatus(id: number, status: string): Promise<Application> {
+    const app = await this.appsRepo.findOneBy({ id });
+    if (!app) throw new NotFoundException();
+    app.status = status;
     return this.appsRepo.save(app);
   }
 }

@@ -4,5 +4,4 @@ export class CreateJobPostDto {
   location?: string;
   salaryRange?: string;
   isActive?: boolean;
-  companyId: number;
 }

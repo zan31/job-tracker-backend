@@ -4,8 +4,10 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { Company } from 'src/companies/entities/company.entity';
+import { Application } from 'src/applications/entities/application.entity';
 
 @Entity('job_posts')
 export class JobPost {
@@ -35,4 +37,7 @@ export class JobPost {
     onUpdate: 'CASCADE',
   })
   company: Company;
+
+  @OneToMany(() => Application, (app) => app.jobPost)
+  applications: Application[];
 }

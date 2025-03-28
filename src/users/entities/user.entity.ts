@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   BeforeInsert,
   JoinColumn,
+  BeforeUpdate,
 } from 'typeorm';
 import { Company } from 'src/companies/entities/company.entity';
 
@@ -39,6 +40,7 @@ export class User {
   company: Company;
 
   @BeforeInsert()
+  @BeforeUpdate()
   async hashPassword() {
     this.passwordHash = await bcrypt.hash(this.passwordHash, 10);
   }

@@ -23,9 +23,9 @@ export class JobPostsService {
     });
   }
 
-  async create(dto: CreateJobPostDto): Promise<JobPost> {
+  async create(dto: CreateJobPostDto, companyId: number): Promise<JobPost> {
     const job = this.jobsRepo.create(dto);
-    const company = await this.companiesService.findOne(dto.companyId);
+    const company = await this.companiesService.findOne(companyId);
     if (!company) {
       throw new NotFoundException('Podjetje ne obstaja');
     }
@@ -35,14 +35,17 @@ export class JobPostsService {
 
   async update(id: number, dto: UpdateJobPostDto): Promise<JobPost> {
     const job = await this.jobsRepo.findOneByOrFail({ id });
-    if (dto.companyId) {
-      const company = await this.companiesService.findOne(dto.companyId);
-      if (!company) {
-        throw new NotFoundException('Podjetje ne obstaja');
-      }
-      job.company = company;
-    }
     await this.jobsRepo.update(id, dto);
     return this.jobsRepo.findOne({ where: { id: id } });
+  }
+
+  findByUser(userId: number) {
+    throw new Error('Method not implemented.');
+  }
+  async findByCompany(companyId: number): Promise<JobPost[]> {
+    return this.jobsRepo.find({
+      where: { company: { id: companyId } },
+      relations: ['applications', 'applications.user'],
+    });
   }
 }
