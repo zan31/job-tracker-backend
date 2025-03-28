@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CompaniesService } from 'src/companies/companies.service';
-import * as bcrypt from 'bcrypt';
+import { S3 } from 'aws-sdk';
 
 @Injectable()
 export class UsersService {
@@ -13,6 +13,7 @@ export class UsersService {
     @InjectRepository(User)
     private usersRepo: Repository<User>,
     private readonly companiesService: CompaniesService,
+    @Inject('S3') private s3: S3,
   ) {}
 
   async findAll(): Promise<User[]> {
@@ -48,8 +49,19 @@ export class UsersService {
     if (dto.fullName) user.fullName = dto.fullName;
 
     if (dto.passwordHash) {
-      user.passwordHash = await bcrypt.hash(dto.passwordHash, 10);
+      user.passwordHash = dto.passwordHash;
     }
+
+    if (dto.cvUrl && user.cvUrl && user.cvUrl !== dto.cvUrl) {
+      const oldKey = user.cvUrl.split('.amazonaws.com/')[1];
+      await this.s3
+        .deleteObject({
+          Bucket: process.env['AWS_BUCKET_NAME'],
+          Key: oldKey,
+        })
+        .promise();
+    }
+    if (dto.cvUrl) user.cvUrl = dto.cvUrl;
 
     return this.usersRepo.save(user);
   }

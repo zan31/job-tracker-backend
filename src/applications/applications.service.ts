@@ -53,7 +53,7 @@ export class ApplicationsService {
   async findByUser(userId: number) {
     return this.appsRepo.find({
       where: { user: { id: userId } },
-      relations: ['jobPost'],
+      relations: ['user', 'jobPost', 'jobPost.company'],
     });
   }
 
