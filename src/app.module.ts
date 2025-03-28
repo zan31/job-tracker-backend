@@ -11,29 +11,30 @@ import { Company } from './companies/entities/company.entity';
 import { JobPost } from './job-posts/entities/job-post.entity';
 import { Application } from './applications/entities/application.entity';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'zan',
-      password: 'skorpijon31',
-      database: 'projekt-job-tracker',
-      autoLoadEntities: true,
-      synchronize: true,
-      entities: [User, Company, JobPost, Application],
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        url: configService.get<string>('DATABASE_URL'),
+        autoLoadEntities: true,
+        synchronize: true,
+        entities: [User, Company, JobPost, Application],
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      }),
+      inject: [ConfigService],
     }),
     UsersModule,
     CompaniesModule,
     JobPostsModule,
     ApplicationsModule,
     AuthModule,
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
   ],
   controllers: [AppController],
   providers: [AppService],
