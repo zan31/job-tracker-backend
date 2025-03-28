@@ -42,8 +42,6 @@ export class JobPostsController {
   async getMine(@Req() req: RequestWithUser) {
     if (req.user.company) {
       return this.jobPostsService.findByCompany(req.user.company);
-    } else {
-      return this.jobPostsService.findByUser(req.user.userId);
     }
   }
 

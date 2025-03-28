@@ -14,7 +14,7 @@ export class JobPostsService {
   ) {}
 
   async findAll(): Promise<JobPost[]> {
-    return this.jobsRepo.find();
+    return this.jobsRepo.find({ relations: ['company'] });
   }
 
   async findOne(id: number): Promise<JobPost> {
@@ -51,9 +51,6 @@ export class JobPostsService {
     });
   }
 
-  findByUser(userId: number) {
-    throw new Error('Method not implemented.');
-  }
   async findByCompany(companyId: number): Promise<JobPost[]> {
     return this.jobsRepo.find({
       where: { company: { id: companyId } },

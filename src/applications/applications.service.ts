@@ -85,4 +85,12 @@ export class ApplicationsService {
     }
     await this.appsRepo.delete(id);
   }
+
+  async delete(id: number): Promise<void> {
+    await this.appsRepo.delete(id);
+  }
+
+  async findAll(): Promise<Application[]> {
+    return this.appsRepo.find({ relations: ['user', 'jobPost'] });
+  }
 }

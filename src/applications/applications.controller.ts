@@ -17,6 +17,7 @@ import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RequestWithUser } from 'src/auth/RequestWithUser';
+import { Application } from './entities/application.entity';
 
 @Controller('applications')
 @UseGuards(JwtAuthGuard)
@@ -26,6 +27,11 @@ export class ApplicationsController {
   @Get('my')
   getMyApplications(@Req() req: RequestWithUser) {
     return this.applicationsService.findByUser(req.user.userId);
+  }
+
+  @Get()
+  async findAll(): Promise<Application[]> {
+    return this.applicationsService.findAll();
   }
 
   @Post()
@@ -60,12 +66,16 @@ export class ApplicationsController {
     return this.applicationsService.updateStatus(id, dto.status);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async withdraw(
     @Param('id', ParseIntPipe) id: number,
     @Req() req: RequestWithUser,
   ) {
     return this.applicationsService.withdraw(id, req.user.userId);
+  }
+
+  @Delete('admin/:id')
+  async delete(@Param('id', ParseIntPipe) id: number) {
+    return this.applicationsService.delete(id);
   }
 }
